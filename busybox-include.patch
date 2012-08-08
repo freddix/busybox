@@ -1,0 +1,12 @@
+diff -aurN busybox-1.20.2.orig/shell/shell_common.c busybox-1.20.2/shell/shell_common.c
+--- busybox-1.20.2.orig/shell/shell_common.c	2012-08-04 22:34:00.264797536 +0200
++++ busybox-1.20.2/shell/shell_common.c	2012-08-04 22:34:39.460252265 +0200
+@@ -19,6 +19,8 @@
+ #include "libbb.h"
+ #include "shell_common.h"
+ 
++#include <sys/resource.h>
++
+ const char defifsvar[] ALIGN1 = "IFS= \t\n";
+ 
+ 
