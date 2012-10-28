@@ -1,9 +1,7 @@
-%bcond_with	huge	# build full featured busybox binary
-
 Summary:	Set of common Unix utilities for embeded systems
 Name:		busybox
 Version:	1.20.2
-Release:	2
+Release:	4
 License:	GPL
 Group:		Applications
 Source0:	http://www.busybox.net/downloads/%{name}-%{version}.tar.bz2
@@ -14,9 +12,6 @@ Patch0:		%{name}-include.patch
 URL:		http://www.busybox.net/
 BuildRequires:	perl-tools-pod
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
-
-%define		_bindir		/bin
-%define		_initrd_bindir	/usr/lib/initrd-utils/bin
 
 %description
 BusyBox combines tiny versions of many common UNIX utilities into a
@@ -46,7 +41,7 @@ Static busybox for initrd.
 %setup -q
 %patch0 -p1
 
-sed -i -e 's|#!/bin/sh|#!/bin/bash|' scripts/gen_build_files.sh
+sed -i -e 's|#!/bin/sh|#!/usr/bin/bash|' scripts/gen_build_files.sh
 
 %build
 install -d built
@@ -61,37 +56,33 @@ install %{SOURCE1} .config
 
 mv -f busybox_unstripped built/busybox.initrd
 
-%if %{with huge}
 %{__make} distclean
 
 # huge
 install %{SOURCE2} .config
 %{__make} oldconfig
 %{__make} -j1 \
-	CC="%{__cc}"			\
-	LDFLAGS="%{rpmldflags} -static"	\
+	CC="%{__cc}"		\
+	LDFLAGS="%{rpmldflags}"	\
 	V=1
 
 %{__make} busybox.links docs/busybox.1
-%endif
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT{%{_initrd_bindir}/bin,%{_bindir},%{_mandir}/man1,%{_libdir}/busybox}
+install -d $RPM_BUILD_ROOT{%{_bindir},%{_mandir}/man1,%{_libdir}/busybox}
 
-install built/busybox.initrd $RPM_BUILD_ROOT%{_initrd_bindir}/busybox
-%if %{with huge}
+install built/busybox.initrd $RPM_BUILD_ROOT%{_bindir}/sbusybox
+
 install busybox_unstripped $RPM_BUILD_ROOT%{_bindir}/busybox
 ln -sf %{_bindir}/busybox $RPM_BUILD_ROOT%{_bindir}/vi
 install busybox.links $RPM_BUILD_ROOT%{_libdir}/busybox
 install docs/busybox.1 $RPM_BUILD_ROOT%{_mandir}/man1
-%endif
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%if %{with huge}
 %files
 %defattr(644,root,root,755)
 %doc AUTHORS README .config
@@ -99,9 +90,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/busybox
 %{_libdir}/busybox
 %{_mandir}/man1/*
-%endif
 
 %files initrd
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_initrd_bindir}/busybox
+%attr(755,root,root) %{_bindir}/sbusybox
 
