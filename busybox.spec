@@ -1,15 +1,16 @@
 Summary:	Set of common Unix utilities for embeded systems
 Name:		busybox
-Version:	1.20.2
-Release:	4
+Version:	1.21.1
+Release:	1
 License:	GPL
 Group:		Applications
 Source0:	http://www.busybox.net/downloads/%{name}-%{version}.tar.bz2
-# Source0-md5:	e025414bc6cd79579cc7a32a45d3ae1c
+# Source0-md5:	795394f83903b5eec6567d51eebb417e
 Source1:	%{name}-initrd.config
 Source2:	%{name}-huge.config
 Patch0:		%{name}-include.patch
 URL:		http://www.busybox.net/
+BuildRequires:	glibc-static
 BuildRequires:	perl-tools-pod
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -30,18 +31,18 @@ customize your embedded systems. To create a working system, just add
 a kernel, a shell (such as ash), and an editor (such as elvis-tiny or
 ae).
 
-%package initrd
-Summary:	Static busybox for initrd
+%package static
+Summary:	Static version off busybox
 Group:		Applications
 
-%description initrd
-Static busybox for initrd.
+%description static
+Statically linked busybox version with essential features set.
 
 %prep
 %setup -q
 %patch0 -p1
 
-sed -i -e 's|#!/bin/sh|#!/usr/bin/bash|' scripts/gen_build_files.sh
+%{__sed} -i 's|#!/bin/sh|#!/usr/bin/bash|' scripts/gen_build_files.sh
 
 %build
 install -d built
@@ -54,8 +55,7 @@ install %{SOURCE1} .config
 	LDFLAGS="%{rpmldflags} -static"	\
 	V=1
 
-mv -f busybox_unstripped built/busybox.initrd
-
+%{__mv} busybox_unstripped built/busybox.static
 %{__make} distclean
 
 # huge
@@ -68,12 +68,11 @@ install %{SOURCE2} .config
 
 %{__make} busybox.links docs/busybox.1
 
-
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_bindir},%{_mandir}/man1,%{_libdir}/busybox}
 
-install built/busybox.initrd $RPM_BUILD_ROOT%{_bindir}/sbusybox
+install built/busybox.static $RPM_BUILD_ROOT%{_bindir}
 
 install busybox_unstripped $RPM_BUILD_ROOT%{_bindir}/busybox
 ln -sf %{_bindir}/busybox $RPM_BUILD_ROOT%{_bindir}/vi
@@ -91,7 +90,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/busybox
 %{_mandir}/man1/*
 
-%files initrd
+%files static
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/sbusybox
+%attr(755,root,root) %{_bindir}/busybox.static
 
