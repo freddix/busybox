@@ -1,7 +1,7 @@
 Summary:	Set of Unix utilities for rescue and embedded system
 Name:		busybox
 Version:	1.21.1
-Release:	2.5
+Release:	4
 License:	GPL
 Group:		Applications
 Source0:	http://www.busybox.net/downloads/%{name}-%{version}.tar.bz2
